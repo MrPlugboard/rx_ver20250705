@@ -1,8 +1,8 @@
-TARGET = $(notdir $(CURDIR))
+TARGET = rx_ver20250703
 
 RTOS = FreeRTOS
 
-NUCLEI_SDK_ROOT = ../..
+NUCLEI_SDK_ROOT = ../../../../../../../..
 
 SRCDIRS = .
 

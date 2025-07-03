@@ -3,6 +3,7 @@
 #include "thmts_rf_config.h"
 #include "flash.h"
 #include "thmts_node_info.h"
+#include "thmts_config.h"
 
 extern void BASIC_TIMER0_IRQHandler(void);
 extern void THURDZ_BB_IRQHandler(void);
@@ -18,7 +19,7 @@ extern uint8_t *p_UartRxDma_Buff;
 
 
 #define	TIMER_PRESCALER 	16
-#define TIMER_AAR			7800  			//  124.8e6/16/7800=1kHz,  1ms
+extern uint16_t TIMER_AAR;  			//  124.8e6/16/7800=1kHz,  1ms
 
 
 #define SPI2_CS_ON  (QSPI_CSModeConfig(QSPI2, QSPI_CSMODE_MODE_HOLD))

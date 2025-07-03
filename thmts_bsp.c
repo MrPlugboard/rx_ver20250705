@@ -1,6 +1,7 @@
 #include "thmts_bsp.h"
 #include "ns_conf.h"
 
+uint16_t TIMER_AAR=7800;  			//  124.8e6/16/7800=1kHz,  1ms
 
 void DebugUart_Config( void )
 {
@@ -505,6 +506,10 @@ void prvSetupHardware(void)
 //	// 从节点时系
 //	mac_config.slot_id = 1;
 //	mac_config.slot_rx_id = 0;
+	mac_config.TimerTickMode=0;         // 计时器每个TIck的周期，0:0.5ms 1：0.625ms 2：0.75ms 3: 1ms（默认）
+	mac_config.TickPerSlot=50;       // 每个Slot占几个TICK，可配值的变量
+	mac_config.SlotNumInFrame=2;    // 每个Frame含几个Slot，可配值的变量
+	mac_config.MaxNodeNum=2;        // 单簇内节点数量，可配值的变量
     write_flash_mac_config();
 #endif
     // 从flash中读取node配置
@@ -515,7 +520,18 @@ void prvSetupHardware(void)
 
 	node.slot_id    = mac_config.slot_id;
 	node.slot_rx_id = mac_config.slot_rx_id;
-
+    // 根据TimerTickMode计算TIMER_AAR
+    if(mac_config.TimerTickMode == 0)
+        TIMER_AAR = 3900;
+    else if(mac_config.TimerTickMode == 1)
+        TIMER_AAR = 4875;
+    else if(mac_config.TimerTickMode == 2)
+        TIMER_AAR = 5850;
+    else if(mac_config.TimerTickMode == 3)
+        TIMER_AAR = 7800;
+    SlotNumInFrame=mac_config.SlotNumInFrame;
+    TickPerSlot=mac_config.TickPerSlot;
+    MaxNodeNum=mac_config.MaxNodeNum;
 
 	// step 3: 配置RF，tx、rx、adc
 	config_thmts_rf_allinone(thmts_phycfg.rf_chan_num);

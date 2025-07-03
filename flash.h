@@ -121,6 +121,10 @@ typedef struct
 {
     uint8_t slot_id;
     uint8_t slot_rx_id;
+    uint8_t TimerTickMode;         // 计时器每个TIck的周期，0:0.5ms 1：0.625ms 2：0.75ms 3: 1ms（默认）
+    uint8_t TickPerSlot;       // 每个Slot占几个TICK，可配值的变量
+    uint8_t SlotNumInFrame;    // 每个Frame含几个Slot，可配值的变量
+    uint8_t MaxNodeNum;        // 单簇内节点数量，可配值的变量
 } MAC_CONFIG_t;
 #pragma pack()
 

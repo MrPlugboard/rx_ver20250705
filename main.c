@@ -83,7 +83,7 @@ void BASIC_TIMER0_IRQHandler(void)
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
         timer_cnt++;
-        if (timer_cnt == SlotPeriodInMS) timer_cnt = 0;
+        if (timer_cnt == TickPerSlot) timer_cnt = 0;
     }
     taskEXIT_CRITICAL_FROM_ISR(ulReturn);
     Basic_Timer_InterruptFlagClear(BASIC_TIMER0, BASIC_TIMER_DIER_UIE);
@@ -273,7 +273,7 @@ void task_startUwbTR(void* pvParameters)
 		start_UWB_TR();
 
 		slot_cnt++;
-		if (slot_cnt==SlotNunInFrame) slot_cnt = 0;
+		if (slot_cnt==SlotNumInFrame) slot_cnt = 0;
 
 	}
 }
@@ -1067,8 +1067,8 @@ void processUwbRx()
 
 
 		}
-    	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "first CRC err pos =%d\r\n",
-    			firsrERRORpos);
+    	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "first CRC err pos =%d,node.role= %d,node.state= %d\r\n",
+    			firsrERRORpos, node.role, node.state);
 	}
 
 

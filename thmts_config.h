@@ -15,8 +15,11 @@
 //#define MASTER_MODE         //设置为主节点
 #define SLAVE_MODE         //设置为从节点
 
-#define SlotPeriodInMS   50
-#define SlotNunInFrame   2
+extern uint8_t SlotPeriodInMS;
+extern uint8_t SlotNumInFrame;
+extern uint8_t MaxNodeNum;
+extern uint8_t TickPerSlot;
+
 
 
 #define AGC_MODE       // AGC模式
