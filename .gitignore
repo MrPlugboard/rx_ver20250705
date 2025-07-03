@@ -1,0 +1,11 @@
+*.bin
+*.dasm
+*.dump
+*.elf
+*.hex
+*.map
+*.srec
+*.verilog
+.vs/
+*.o
+*.d
