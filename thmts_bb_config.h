@@ -378,9 +378,10 @@ typedef struct
 {
     uint16_t dev_id;
     uint16_t slot_id;
-    int64_t rx_stamp;
-    int64_t tx_stamp;
-    uint8_t data[523];
+    uint16_t frame_id;
+    uint8_t slot_type;
+    int64_t rx_stamp[16];
+    uint64_t tx_stamp;
     uint32_t RSV;
 } thmts_ranging_frame_t;
 #pragma pack()

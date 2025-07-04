@@ -616,18 +616,13 @@ void start_UWB_TR()
 
 		thmts_tx_frame.dev_id = node.dev_id;
 		thmts_tx_frame.slot_id = slot_cnt;
-		thmts_tx_frame.rx_stamp = node.ts_curr_rmark;
+		thmts_tx_frame.rx_stamp[0] = node.ts_curr_rmark;
 		thmts_tx_frame.tx_stamp = (txdly_ts >> 9) << 9;
 		thmts_tx_frame.RSV = 0x0;
 		if(node.role==1)
 		{
 			altds_twr.resp_tx_time=thmts_tx_frame.tx_stamp;
 		}
-
-
-		for(uint16_t jj = 0 ; jj < sizeof(thmts_tx_frame.data) ; jj++)
-			thmts_tx_frame.data[jj] = (jj & 0xFF);
-
 
 		TX_slot_info.PHR       = thmts_phycfg.phr_info_bit;
 		TX_slot_info.dev_id    = node.dev_id;
@@ -853,27 +848,27 @@ void processUwbRx()
 
 
 		int print_timeStamp=0;
-		print_timeStamp = 1;
+		print_timeStamp = 0;
 		if(print_timeStamp==1)
 		{
-			uint32_t timeStamp_hi,timeStamp_lo;
-
-			timeStamp_hi = (uint32_t)(thmts_tx_frame.tx_stamp >> 32);
-			timeStamp_lo = (uint32_t)(thmts_tx_frame.tx_stamp);
-			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "last tmark = %3u , %10u |" , timeStamp_hi , timeStamp_lo);
-
-
-			timeStamp_hi = (uint32_t)(thmts_rx_frame.rx_stamp >> 32);
-			timeStamp_lo = (uint32_t)(thmts_rx_frame.rx_stamp);
-			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rec rmark = %3u , %10u\r\n" , timeStamp_hi , timeStamp_lo);
-
-			timeStamp_hi = (uint32_t)(node.ts_curr_rmark >> 32);
-			timeStamp_lo = (uint32_t)(node.ts_curr_rmark);
-			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "temp rmark = %3u , %10u |" , timeStamp_hi , timeStamp_lo);
-
-			timeStamp_hi = (uint32_t)(thmts_rx_frame.tx_stamp >> 32);
-			timeStamp_lo = (uint32_t)(thmts_rx_frame.tx_stamp);
-			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rec tmark = %3u , %10u \r\n" , timeStamp_hi , timeStamp_lo);
+//			uint32_t timeStamp_hi,timeStamp_lo;
+//
+//			timeStamp_hi = (uint32_t)(thmts_tx_frame.tx_stamp >> 32);
+//			timeStamp_lo = (uint32_t)(thmts_tx_frame.tx_stamp);
+//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "last tmark = %3u , %10u |" , timeStamp_hi , timeStamp_lo);
+//
+//
+//			timeStamp_hi = (uint32_t)(thmts_rx_frame.rx_stamp >> 32);
+//			timeStamp_lo = (uint32_t)(thmts_rx_frame.rx_stamp);
+//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rec rmark = %3u , %10u\r\n" , timeStamp_hi , timeStamp_lo);
+//
+//			timeStamp_hi = (uint32_t)(node.ts_curr_rmark >> 32);
+//			timeStamp_lo = (uint32_t)(node.ts_curr_rmark);
+//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "temp rmark = %3u , %10u |" , timeStamp_hi , timeStamp_lo);
+//
+//			timeStamp_hi = (uint32_t)(thmts_rx_frame.tx_stamp >> 32);
+//			timeStamp_lo = (uint32_t)(thmts_rx_frame.tx_stamp);
+//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rec tmark = %3u , %10u \r\n" , timeStamp_hi , timeStamp_lo);
 		}
 
 
@@ -926,7 +921,7 @@ void processUwbRx()
 					{
 						altds_twr.poll2_rx_time=node.ts_curr_rmark;
 						altds_twr.poll2_tx_time=thmts_rx_frame.tx_stamp;
-						altds_twr.resp_rx_time=thmts_rx_frame.rx_stamp;
+						altds_twr.resp_rx_time=thmts_rx_frame.rx_stamp[0];
 
 						if(altds_dstwr_check(&altds_twr))
 						{
@@ -1056,19 +1051,8 @@ void processUwbRx()
 	{
 		uint32_t testCnt = 0;
 
-		uint16_t firsrERRORpos = 0;
-		for(uint16_t index = 0 ; index < sizeof(thmts_rx_frame.data) ; index++)
-		{
-			if(thmts_rx_frame.data[index] != (uint8_t)(index & 0xFF))
-			{
-				firsrERRORpos = index;
-				break;
-			}
-
-
-		}
-    	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "first CRC err pos =%d,node.role= %d,node.state= %d\r\n",
-    			firsrERRORpos, node.role, node.state);
+    	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "node.role= %d,node.state= %d\r\n",
+    			 node.role, node.state);
 	}
 
 
