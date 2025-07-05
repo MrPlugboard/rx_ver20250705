@@ -6,15 +6,13 @@ double tof;
 uint8_t altds_dstwr_check(altds_twr_ptr altds_twr_p)
 {
 	uint8_t altds_completed = 0;
-    if(altds_twr_p->poll_cnt == 1){
-    	if(altds_twr_p->poll_rx_time != 0 &&
-    			altds_twr_p->poll_tx_time != 0 &&
-				altds_twr_p->poll2_rx_time != 0 &&
-				altds_twr_p->poll2_tx_time != 0 &&
-				altds_twr_p->resp_rx_time != 0 &&
-				altds_twr_p->resp_tx_time != 0){
-    		altds_completed = 1;
-    	}
+	if(altds_twr_p->poll_rx_time != 0 &&
+			altds_twr_p->poll_tx_time != 0 &&
+			altds_twr_p->poll2_rx_time != 0 &&
+			altds_twr_p->poll2_tx_time != 0 &&
+			altds_twr_p->resp_rx_time != 0 &&
+			altds_twr_p->resp_tx_time != 0){
+		altds_completed = 1;
     }
     return altds_completed;
 }

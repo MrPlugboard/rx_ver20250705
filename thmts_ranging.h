@@ -16,6 +16,7 @@ typedef struct{
     uint64_t poll2_tx_time;    // T5 - 发起方发送 Roll2 的时间戳   *
     uint64_t poll2_rx_time;    // T6 - 响应方接收 Roll2 的时间戳   *
     uint8_t  poll_cnt;
+    uint16_t poll1_frame_id;   // 发起方发送Poll1的frame id
 } altds_twr_t;
 #pragma pack()
 typedef altds_twr_t* altds_twr_ptr;
