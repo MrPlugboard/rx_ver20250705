@@ -187,6 +187,28 @@ void LGPIO0_IMU_IRQHandler(void)
 
 // 全局变量定义区域
 uint32_t slot_cnt = 0;
+uint16_t frame_cnt = 0;
+uint32_t adjust_cnt = 0;
+uint64_t ts_last_master_rmark = 0;
+uint8_t first_rcved_master = 0;  //是否曾经接受过master的消息：影响对于重组网的判断条件
+
+uint64_t poll1_tx_stamp_t[16] = {0};
+uint64_t poll1_rx_stamp_t[16] = {0};
+uint64_t resp_rx_stamp_t[16] = {0};
+uint64_t resp_tx_stamp_t = 0;
+uint64_t poll2_tx_stamp_t[16] = {0};
+uint64_t poll2_rx_stamp_t[16] = {0};
+
+#pragma pack(1)
+typedef struct
+{
+    uint64_t rx_stamp[16];
+    uint16_t frame_id[16];
+} thmts_rx_stamp_frame_t;
+#pragma pack()
+//extern thmts_rx_stamp_frame_t  thmts_rx_stamp_frame;
+
+thmts_rx_stamp_frame_t thmts_rx_stamp_frame={0};
 
 uint8_t debug_ranging_buf[500];
 
@@ -260,6 +282,7 @@ int main()
 }
 
 
+
 void start_UWB_TR();
 
 void task_startUwbTR(void* pvParameters)
@@ -273,7 +296,10 @@ void task_startUwbTR(void* pvParameters)
 		start_UWB_TR();
 
 		slot_cnt++;
-		if (slot_cnt==SlotNumInFrame) slot_cnt = 0;
+		if (slot_cnt==SlotNumInFrame) {
+			slot_cnt = 0;
+			frame_cnt++;
+		}
 
 	}
 }
@@ -734,7 +760,7 @@ void start_UWB_TR()
 			delta_test = node.arr_adjust;
 
 
-			Basic_Timer_AutoReloadValueConfig(BASIC_TIMER0 , TIMER_AAR*SlotPeriodInMS - 1 + delta_test - 2);
+			Basic_Timer_AutoReloadValueConfig(BASIC_TIMER0 , TIMER_AAR*TickPerSlot - 1 + delta_test - 2);
 			node.arr_adjust_flag = 2;
 			slot_cnt = 1;
 			timer_cnt = 0;

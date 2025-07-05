@@ -15,7 +15,6 @@
 //#define MASTER_MODE         //设置为主节点
 #define SLAVE_MODE         //设置为从节点
 
-extern uint8_t SlotPeriodInMS;
 extern uint8_t SlotNumInFrame;
 extern uint8_t MaxNodeNum;
 extern uint8_t TickPerSlot;
