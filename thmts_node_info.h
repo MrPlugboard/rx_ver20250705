@@ -35,11 +35,14 @@ typedef struct
 // 全局节点变量声明（extern）
 extern THMTS_NodeInfo_t node;
 
+#define NODE_STATE_IDLE 0
+#define NODE_STATE_SEARCH 1
+#define NODE_STATE_CONNECTED 2
+#define NODE_STATE_SELFLOOP 3
 
 #define  NODE_ROLE_ANCHOR_MASTER				0
 #define  NODE_ROLE_ANCHOR_SLAVE_NORMAL  		1
 #define  NODE_ROLE_ANCHOR_SLAVE_BACKUP  		2
-
 #define  NODE_ROLE_TAG								3
 #define  NODE_ROLE_SELFTESTER_IN					4
 #define  NODE_ROLE_SELFTESTER_OUT					5

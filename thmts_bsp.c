@@ -433,16 +433,18 @@ void prvSetupHardware(void)
 
 #ifdef TEST_MODE
     // node配置写入flash
-    node_config.role = NODE_ROLE_ANCHOR_MASTER;          //主节点
-    node.dev_id = 0;
-//    node_config.role = NODE_ROLE_ANCHOR_SLAVE_NORMAL;    //从节点
-//    node_config.dev_id = 1;
+//    node_config.role = NODE_ROLE_ANCHOR_MASTER;          //主节点
+//    node.dev_id = 0;
+    node_config.role = NODE_ROLE_ANCHOR_SLAVE_NORMAL;    //从节点
+    node_config.dev_id = 1;
     write_flash_node_config();
 #endif
     // 从flash中读取node配置
     read_flash_node_config();
 
 	node.role = node_config.role;
+	node.dev_id = node_config.dev_id;
+	node.group_id = node_config.group_id;
 
 	if(node.role == NODE_ROLE_SELFTESTER_IN || node.role == NODE_ROLE_SELFTESTER_OUT)
 		node.state = 3;
@@ -514,8 +516,8 @@ void prvSetupHardware(void)
 		mac_config.slot_rx_id = 0;
     }
 
-	mac_config.TimerTickMode=0;         // 计时器每个TIck的周期，0:0.5ms 1：0.625ms 2：0.75ms 3: 1ms（默认）
-	mac_config.TickPerSlot=50;       // 每个Slot占几个TICK，可配值的变量
+	mac_config.TimerTickMode=3;         // 计时器每个TIck的周期，0:0.5ms 1：0.625ms 2：0.75ms 3: 1ms（默认）
+	mac_config.TickPerSlot=200;       // 每个Slot占几个TICK，可配值的变量
 	mac_config.SlotNumInFrame=2;    // 每个Frame含几个Slot，可配值的变量
 	mac_config.MaxNodeNum=2;        // 单簇内节点数量，可配值的变量
     write_flash_mac_config();
@@ -532,8 +534,8 @@ void prvSetupHardware(void)
 	for (int i = 0; i < mac_config.SlotNumInFrame; i++) {	// all 0x20 first
 		node.slot_mac[i] = 0x20;
 	}
-	node.slot_mac[mac_config.SlotNumInFrame - 2] = 0x40;	// 0x40: communication frame1
-	node.slot_mac[mac_config.SlotNumInFrame - 1] = 0x41;	// 0x41: communication frame2
+//	node.slot_mac[mac_config.SlotNumInFrame - 2] = 0x40;	// 0x40: communication frame1
+//	node.slot_mac[mac_config.SlotNumInFrame - 1] = 0x41;	// 0x41: communication frame2
 	// 指定位置赋值
 	node.slot_mac[node.dev_id] = 0x11;	// 0x11: poll1
 	node.slot_mac[node.dev_id + 16] = 0x12;	// 0x12: resp

@@ -1,4 +1,4 @@
-TARGET = rx_ver20250703
+TARGET = rx_ver20250705
 
 RTOS = FreeRTOS
 
