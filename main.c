@@ -1497,15 +1497,15 @@ void processUwbRx()
            	// txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rx_status = %d\r\n",
            	// 		(rx_status & 0xFF));
 
-   	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "node_adjust = %d , AGC_num = %d node_adjust_flag = %d\r\n",
-   			node.arr_adjust,
-				AGC_num,
-				node.arr_adjust_flag);
-//
-//
-   	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "adjust_tick_period = %d Tick , adjust_tick_cnt = %d\r\n",
-   			adjust_tick_period,
-				adjust_tick_cnt);
+//   	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "node_adjust = %d , AGC_num = %d node_adjust_flag = %d\r\n",
+//   			node.arr_adjust,
+//				AGC_num,
+//				node.arr_adjust_flag);
+////
+////
+//   	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "adjust_tick_period = %d Tick , adjust_tick_cnt = %d\r\n",
+//   			adjust_tick_period,
+//				adjust_tick_cnt);
 
 
 
@@ -1526,7 +1526,7 @@ void processUwbRx()
     	}
     	else
     	{
-        	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "total rx = %d, ok = %d , timeout = %d , phr error = %d , crc error = %d slot cnt=%d\r\n",
+        	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "total rx = %d, ok = %d , timeout = %d , phr error = %d , crc error = %d slot cnt=%d  %d\r\n",
         			rx_cnt,
     				crc_ok_cnt,
     				rx_timeout_cnt,
