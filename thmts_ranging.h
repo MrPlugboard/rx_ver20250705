@@ -22,7 +22,7 @@ typedef struct{
 typedef altds_twr_t* altds_twr_ptr;
 
 extern altds_twr_t altds_twr;
-extern double tof;
+extern double tof[16];
 
 uint8_t altds_dstwr_check(altds_twr_ptr altds_twr_p);
 double altds_dstwr_compute(altds_twr_ptr altds_twr_p);

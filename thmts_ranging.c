@@ -1,7 +1,7 @@
 #include "thmts_ranging.h"
 
 altds_twr_t altds_twr;
-double tof;
+double tof[16];
 
 uint8_t altds_dstwr_check(altds_twr_ptr altds_twr_p)
 {

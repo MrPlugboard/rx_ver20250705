@@ -294,7 +294,14 @@ int ori_flag=0;
 
 void mac_startTR(uint8_t behave_type)
 {
-	//thmts_tx_msg_info_t *ptMsg = pvPortMalloc(sizeof(thmts_tx_msg_info_t));
+	uint32_t txPoint_buff = 0;
+
+	thmts_tx_msg_info_t *ptMsg = pvPortMalloc(sizeof(thmts_tx_msg_info_t));
+	ptMsg->msg_id      = 1;
+	ptMsg->msg_type    = 0x41;
+	ptMsg->msg_status  = 1;
+	ptMsg->msg_ptr     = debug_ranging_buf2;
+
 	switch (behave_type)
 	{
 	case 0x00://空闲
@@ -471,28 +478,30 @@ void mac_startTR(uint8_t behave_type)
 	case 0x40:  //入网申请帧，计算帧
 	{
 		for(int i = 0; i < 16; i++){
-			altds_twr_t twr;
-			if(i==0 || i==1)
+			if(i!=node.dev_id)
 			{
-				twr.poll_tx_time = poll1_tx_stamp_t[i];
-				twr.poll_rx_time = poll1_rx_stamp_t[i];
-				twr.resp_tx_time = resp_tx_stamp_t;
-				twr.resp_rx_time = resp_rx_stamp_t[i];
-				twr.poll2_tx_time = poll2_tx_stamp_t[i];
-				twr.poll2_rx_time = poll2_rx_stamp_t[i];
+				continue;
+			}
+			altds_twr_t twr;
+			twr.poll_tx_time = poll1_tx_stamp_t[i];
+			twr.poll_rx_time = poll1_rx_stamp_t[i];
+			twr.resp_tx_time = resp_tx_stamp_t;
+			twr.resp_rx_time = resp_rx_stamp_t[i];
+			twr.poll2_tx_time = poll2_tx_stamp_t[i];
+			twr.poll2_rx_time = poll2_rx_stamp_t[i];
 
-				uint32_t poll_tx_hi = (uint32_t)(twr.poll_tx_time >> 32);
-				uint32_t poll_tx_lo = (uint32_t)(twr.poll_tx_time);
-				uint32_t poll_rx_hi = (uint32_t)(twr.poll_rx_time >> 32);
-				uint32_t poll_rx_lo = (uint32_t)(twr.poll_rx_time);
-				uint32_t resp_tx_hi = (uint32_t)(twr.resp_tx_time >> 32);
-				uint32_t resp_tx_lo = (uint32_t)(twr.resp_tx_time);
-				uint32_t resp_rx_hi = (uint32_t)(twr.resp_rx_time >> 32);
-				uint32_t resp_rx_lo = (uint32_t)(twr.resp_rx_time);
-				uint32_t poll2_tx_hi = (uint32_t)(twr.poll2_tx_time >> 32);
-				uint32_t poll2_tx_lo = (uint32_t)(twr.poll2_tx_time);
-				uint32_t poll2_rx_hi = (uint32_t)(twr.poll2_rx_time >> 32);
-				uint32_t poll2_rx_lo = (uint32_t)(twr.poll2_rx_time);
+			uint32_t poll_tx_hi = (uint32_t)(twr.poll_tx_time >> 32);
+			uint32_t poll_tx_lo = (uint32_t)(twr.poll_tx_time);
+			uint32_t poll_rx_hi = (uint32_t)(twr.poll_rx_time >> 32);
+			uint32_t poll_rx_lo = (uint32_t)(twr.poll_rx_time);
+			uint32_t resp_tx_hi = (uint32_t)(twr.resp_tx_time >> 32);
+			uint32_t resp_tx_lo = (uint32_t)(twr.resp_tx_time);
+			uint32_t resp_rx_hi = (uint32_t)(twr.resp_rx_time >> 32);
+			uint32_t resp_rx_lo = (uint32_t)(twr.resp_rx_time);
+			uint32_t poll2_tx_hi = (uint32_t)(twr.poll2_tx_time >> 32);
+			uint32_t poll2_tx_lo = (uint32_t)(twr.poll2_tx_time);
+			uint32_t poll2_rx_hi = (uint32_t)(twr.poll2_rx_time >> 32);
+			uint32_t poll2_rx_lo = (uint32_t)(twr.poll2_rx_time);
 
 //				txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff],
 //					"poll_tx = %3u, %10u | poll_rx = %3u, %10u | resp_tx = %3u, %10u | resp_rx = %3u, %10u | poll2_tx = %3u, %10u | poll2_rx = %3u, %10u |\r\n",
@@ -503,7 +512,6 @@ void mac_startTR(uint8_t behave_type)
 //					poll2_tx_hi, poll2_tx_lo,
 //					poll2_rx_hi, poll2_rx_lo
 //				);
-			}
 
 			if(altds_dstwr_check(&twr))
 			{
@@ -513,7 +521,7 @@ void mac_startTR(uint8_t behave_type)
 				get_thmts_bb_systime( &bb_tick1 );
 
 
-				tof=altds_dstwr_compute(&twr);
+				tof[i]=altds_dstwr_compute(&twr);
 
 				get_thmts_bb_systime( &bb_tick2 );
 				uint64_t bb_tick_diff= timestamp_substract(bb_tick2,bb_tick1);
@@ -522,9 +530,9 @@ void mac_startTR(uint8_t behave_type)
 //												    uint32_t rtc_tick_1 = SysTimer_GetLoadValue();
 //												    uint32_t rtc_tick_diff = rtc_tick_1 - rtc_tick;
 //												    txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "compute time = %u \r\n" , rtc_tick_diff );
-				tof_int=tof*100;
-				tof_flag=1;
-				//txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "dev %d, tof_int = %d \r\n" ,i, tof_int );
+				tof_int=tof[i]*100;
+				// tof_flag=1;
+				txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf2[txPoint_buff], " tof_int between %d and %d = %d \r\n" ,i,node.dev_id, tof_int );
 			}
 			altds_dstwr_clear(&twr);
 		}
@@ -543,15 +551,15 @@ void mac_startTR(uint8_t behave_type)
 	default:
 		break;
 	}
-//	if(txPoint_buff > 0 )
-//	{
-//		ptMsg->msg_length  = txPoint_buff;
-//		xQueueSend(xQueue, &ptMsg, portMAX_DELAY);
-//	}
-//	else
-//	{
-//		vPortFree(ptMsg);
-//	}
+	if(txPoint_buff > 0 )
+	{
+		ptMsg->msg_length  = txPoint_buff;
+		xQueueSend(xQueue, &ptMsg, portMAX_DELAY);
+	}
+	else
+	{
+		vPortFree(ptMsg);
+	}
 }
 
 void task_startUwbTR(void* pvParameters)
@@ -1333,16 +1341,16 @@ void processUwbRx()
 							get_thmts_bb_systime( &bb_tick1 );
 
 
-							tof=altds_dstwr_compute(&altds_twr);
-
-							get_thmts_bb_systime( &bb_tick2 );
-							uint64_t bb_tick_diff= timestamp_substract(bb_tick2,bb_tick1);
-
-							tof_int=tof*100;
-							thmts_rx_content.tof_int = tof_int;
-
-			            	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "tof_int =%d\r\n",
-			            			tof_int);
+//							tof=altds_dstwr_compute(&altds_twr);
+//
+//							get_thmts_bb_systime( &bb_tick2 );
+//							uint64_t bb_tick_diff= timestamp_substract(bb_tick2,bb_tick1);
+//
+//							tof_int=tof*100;
+//							thmts_rx_content.tof_int = tof_int;
+//
+//			            	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "tof_int =%d\r\n",
+//			            			tof_int);
 
 
 			            	// 上报测距消息
