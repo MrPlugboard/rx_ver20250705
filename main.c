@@ -212,6 +212,7 @@ typedef struct
 thmts_rx_stamp_frame_t thmts_rx_stamp_frame={0};
 
 uint8_t debug_ranging_buf[500];
+uint8_t debug_ranging_buf2[500];
 
 thmts_ctrl_cmd_proc_msg_t thmts_ctrl_cmd_proc_msg;
 
@@ -289,7 +290,7 @@ void start_UWB_TR_ori();
 
 int tof_int=0;
 int tof_flag=0;
-int ori_flag=1;
+int ori_flag=0;
 
 void mac_startTR(uint8_t behave_type)
 {
@@ -302,8 +303,8 @@ void mac_startTR(uint8_t behave_type)
 	case 0x11://tx frame a1
 	{
 		uint64_t txdly_ts;
-//			txdly_ts = timestamp_add( node.ts_into_timer, 35 * TICK_PER_10US );
-		txdly_ts = timestamp_add( node.ts_into_timer, 25 * TICK_PER_10US );
+//			txdly_ts = timestamp_add( node.ts_into_timer, 25 * TICK_PER_10US );
+		txdly_ts = timestamp_add( node.ts_into_timer, 55 * TICK_PER_10US );
 
 		thmts_tx_frame.dev_id = node.dev_id;
 		thmts_tx_frame.slot_id = slot_cnt;
@@ -336,7 +337,7 @@ void mac_startTR(uint8_t behave_type)
 	{
 		uint64_t txdly_ts;
 //			txdly_ts = timestamp_add( node.ts_into_timer, 35 * TICK_PER_10US );
-		txdly_ts = timestamp_add( node.ts_into_timer, 25 * TICK_PER_10US );
+		txdly_ts = timestamp_add( node.ts_into_timer, 55 * TICK_PER_10US );
 
 		thmts_tx_frame.dev_id = node.dev_id;
 		thmts_tx_frame.slot_id = slot_cnt;
@@ -372,7 +373,7 @@ void mac_startTR(uint8_t behave_type)
 	{
 		uint64_t txdly_ts;
 //			txdly_ts = timestamp_add( node.ts_into_timer, 35 * TICK_PER_10US );
-		txdly_ts = timestamp_add( node.ts_into_timer, 25 * TICK_PER_10US );
+		txdly_ts = timestamp_add( node.ts_into_timer, 55 * TICK_PER_10US );
 
 		thmts_tx_frame.dev_id = node.dev_id;
 		thmts_tx_frame.slot_id = slot_cnt;
@@ -1169,7 +1170,7 @@ uint32_t crc_ok_cnt = 0;
 void processUwbRx()
 {
 	uint32_t PHR_info_RX = 0;
-	int tof_int = 0;
+//	int tof_int = 0;
 	// 发送结构体指针
 	uint32_t txPoint_buff = 0;
 
