@@ -433,10 +433,10 @@ void prvSetupHardware(void)
 
 #ifdef TEST_MODE
     // node配置写入flash
-//    node_config.role = NODE_ROLE_ANCHOR_MASTER;          //主节点
-//    node.dev_id = 0;
-    node_config.role = NODE_ROLE_ANCHOR_SLAVE_NORMAL;    //从节点
-    node_config.dev_id = 1;
+    node_config.role = NODE_ROLE_ANCHOR_MASTER;          //主节点
+    node.dev_id = 0;
+//    node_config.role = NODE_ROLE_ANCHOR_SLAVE_NORMAL;    //从节点
+//    node_config.dev_id = 1;
     write_flash_node_config();
 #endif
     // 从flash中读取node配置
@@ -517,7 +517,7 @@ void prvSetupHardware(void)
     }
 
 	mac_config.TimerTickMode=0;         // 计时器每个TIck的周期，0:0.5ms 1：0.625ms 2：0.75ms 3: 1ms（默认）
-	mac_config.TickPerSlot=2;       // 每个Slot占几个TICK，可配值的变量
+	mac_config.TickPerSlot=3;       // 每个Slot占几个TICK，可配值的变量
 	mac_config.SlotNumInFrame=50;    // 每个Frame含几个Slot，可配值的变量
 	mac_config.MaxNodeNum=2;        // 单簇内节点数量，可配值的变量
     write_flash_mac_config();

@@ -1526,7 +1526,7 @@ void processUwbRx()
     	}
     	else
     	{
-        	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "total rx = %d, ok = %d , timeout = %d , phr error = %d , crc error = %d slot cnt=%d  %d\r\n",
+        	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "total rx = %d, ok = %d , timeout = %d , phr error = %d , crc error = %d slot cnt=%d \r\n",
         			rx_cnt,
     				crc_ok_cnt,
     				rx_timeout_cnt,
