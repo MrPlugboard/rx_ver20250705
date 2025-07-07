@@ -286,11 +286,8 @@ int main()
 
 
 void start_UWB_TR();
-void start_UWB_TR_ori();
 
 int tof_int=0;
-int tof_flag=0;
-int ori_flag=0;
 
 void mac_startTR(uint8_t behave_type)
 {
@@ -531,7 +528,6 @@ void mac_startTR(uint8_t behave_type)
 //												    uint32_t rtc_tick_diff = rtc_tick_1 - rtc_tick;
 //												    txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "compute time = %u \r\n" , rtc_tick_diff );
 				tof_int=tof[i]*100;
-				// tof_flag=1;
 				txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf2[txPoint_buff], " tof_int between %d and %d = %d \r\n" ,i,node.dev_id, tof_int );
 			}
 			altds_dstwr_clear(&twr);
@@ -573,15 +569,7 @@ void task_startUwbTR(void* pvParameters)
 		{
 			continue;
 		}
-		if(ori_flag==0)
-		{
-			start_UWB_TR();
-		}
-		else
-		{
-			start_UWB_TR_ori();
-		}
-		
+		start_UWB_TR();
 
 		slot_cnt++;
 		if (slot_cnt==SlotNumInFrame) {
@@ -978,165 +966,6 @@ void start_UWB_TR()
 
 }
 
-void start_UWB_TR_ori()
-{
-	
-	int32_t delta_test = 0;
-
-	// for start UWB TX
-	if (slot_cnt == node.slot_id)
-	{
-		uint64_t txdly_ts;
-		txdly_ts = timestamp_add( node.ts_into_timer, 55 * TICK_PER_10US );
-
-		thmts_tx_frame.dev_id = node.dev_id;
-		thmts_tx_frame.slot_id = slot_cnt;
-		thmts_tx_frame.rx_stamp[0] = node.ts_curr_rmark;
-		thmts_tx_frame.tx_stamp = (txdly_ts >> 9) << 9;
-		thmts_tx_frame.RSV = 0x0;
-		if(node.role==1)
-		{
-			altds_twr.resp_tx_time=thmts_tx_frame.tx_stamp;
-		}
-
-		TX_slot_info.PHR       = thmts_phycfg.phr_info_bit;
-		TX_slot_info.dev_id    = node.dev_id;
-		TX_slot_info.slot_id  = slot_cnt;
-		TX_slot_info.tx_length = sizeof(thmts_tx_frame);
-		TX_slot_info.tx_data   = thmts_tx_frame;
-
-
-		if (node.state == 2) // 处于正常工作状态，启动发射
-		{
-
-			BB_TX_MODULE_POWER_DOWN;
-			BB_TX_MODULE_POWER_ON;
-
-			set_thmts_bb_delaytxtime(&thmts_phycfg, (txdly_ts>>9));
-			start_thmts_bb_tx(&thmts_phycfg, &thmts_tx_frame, tx_flen+4);
-			PA_ENABLE;
-			RF_TX_POWER_ON;
-
-			node.uwb_tx_busy = 1;
-
-
-		}
-
-
-
-
-		if(node.role == NODE_ROLE_SELFTESTER_IN || node.role == NODE_ROLE_SELFTESTER_OUT)
-		{
-			//对于新底板，没有自环模式
-			if (node.state == 3) // 处于闭环测试状态，启动发射和接收
-			{
-
-				config_thmts_bb_txsw_on();
-				config_thmts_bb_rx_sw_lna_on(thmts_phycfg.rf_chan_num);
-
-
-				reset_thmts_bb_rx_module();
-				reset_thmts_bb_tx_module();
-
-			    uint64_t rtc_tmp = SysTimer_GetLoadValue();
-
-
-				set_thmts_bb_delaytxtime(&thmts_phycfg, (txdly_ts>>9));
-
-				start_thmts_bb_rx(&thmts_phycfg, 1024);
-				start_thmts_bb_tx(&thmts_phycfg, &thmts_tx_frame, tx_flen+4);
-
-
-
-				node.uwb_tx_busy = 1;
-				node.uwb_rx_busy = 1;
-
-
-			}
-		}
-
-	} // for start UWB RX
-	else  // 在其它slot，接收
-	{
-
-		if (node.state == 2)
-		{
-			if(node.slot_rx_id == 65535)
-			{
-				if (node.uwb_rx_busy == 0)
-				{
-
-					BB_RX_MODULE_POWER_DOWN;
-					BB_RX_MODULE_POWER_ON;
-					config_thmts_bb_rx_sw_lna_on(thmts_phycfg.rf_chan_num);
-					start_thmts_bb_rx(&thmts_phycfg, 1024);			// 超时时间设置为1ms
-
-					node.uwb_rx_busy = 1;
-				}
-			}
-			else if(slot_cnt == node.slot_rx_id)
-			{
-				if (node.uwb_rx_busy == 0)
-				{
-					BB_RX_MODULE_POWER_DOWN;
-					BB_RX_MODULE_POWER_ON;
-					config_thmts_bb_rx_sw_lna_on(thmts_phycfg.rf_chan_num);
-					start_thmts_bb_rx(&thmts_phycfg, 1024);			// 超时时间设置为1ms
-
-					node.uwb_rx_busy = 1;
-				}
-			}
-		}
-		else if (node.state == 1)
-		{
-			if (node.uwb_rx_busy == 0)
-			{
-				BB_RX_MODULE_POWER_DOWN;
-				BB_RX_MODULE_POWER_ON;
-				config_thmts_bb_rx_sw_lna_on(thmts_phycfg.rf_chan_num);
-				start_thmts_bb_rx(&thmts_phycfg, 1024000); 		// 超时时间设置为1s
-
-				node.uwb_rx_busy = 1;
-			}
-		}
-	}
-
-	// for slot sync
-	if (node.state == 1)
-	{
-		if(node.arr_adjust_flag == 1)
-		{
-			delta_test = node.arr_adjust;
-
-
-			Basic_Timer_AutoReloadValueConfig(BASIC_TIMER0 , TIMER_AAR*TickPerSlot - 1 + delta_test - 2);
-			node.arr_adjust_flag = 2;
-			slot_cnt = 1;
-			timer_cnt = 0;
-		}
-		else if(node.arr_adjust_flag == 2)
-		{
-			Basic_Timer_AutoReloadValueConfig(BASIC_TIMER0 , TIMER_AAR - 1);
-			node.state = 2;
-			node.arr_adjust_flag = 3;
-		}
-	}
-	else if ((node.role == 1) && (node.state == 2))
-	{
-		if(node.arr_adjust_flag == 4)
-		{
-			Basic_Timer_AutoReloadValueConfig(BASIC_TIMER0 , TIMER_AAR - 1 + node.arr_adjust - 2);
-			node.arr_adjust_flag = 5;
-//				printf("node.arr_adjust = %d" , node.arr_adjust);
-		}
-		else
-		{
-			Basic_Timer_AutoReloadValueConfig(BASIC_TIMER0 , TIMER_AAR - 1);
-		}
-	}
-}
-
-
 void processUwbTx()
 {
 	tx_complete = 0;
@@ -1214,35 +1043,10 @@ void processUwbRx()
 		uint32_t CRC_RX = 0;
 		memcpy(&CRC_RX , (uint32_t *)(0x10132000 + 5 + sizeof(thmts_ranging_frame_t) - 4) , 2);
 
-    	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "CRC_BB_HIGH16 =%4x , CRC_BB_LOW16 = %4x , CRC_RX = %4x\r\n",
-    			CRC_BB_HIGH16,
-				CRC_BB_LOW16,
-				CRC_RX);
-
-
-		int print_timeStamp=0;
-		print_timeStamp = 0;
-		if(print_timeStamp==1)
-		{
-//			uint32_t timeStamp_hi,timeStamp_lo;
-//
-//			timeStamp_hi = (uint32_t)(thmts_tx_frame.tx_stamp >> 32);
-//			timeStamp_lo = (uint32_t)(thmts_tx_frame.tx_stamp);
-//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "last tmark = %3u , %10u |" , timeStamp_hi , timeStamp_lo);
-//
-//
-//			timeStamp_hi = (uint32_t)(thmts_rx_frame.rx_stamp >> 32);
-//			timeStamp_lo = (uint32_t)(thmts_rx_frame.rx_stamp);
-//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rec rmark = %3u , %10u\r\n" , timeStamp_hi , timeStamp_lo);
-//
-//			timeStamp_hi = (uint32_t)(node.ts_curr_rmark >> 32);
-//			timeStamp_lo = (uint32_t)(node.ts_curr_rmark);
-//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "temp rmark = %3u , %10u |" , timeStamp_hi , timeStamp_lo);
-//
-//			timeStamp_hi = (uint32_t)(thmts_rx_frame.tx_stamp >> 32);
-//			timeStamp_lo = (uint32_t)(thmts_rx_frame.tx_stamp);
-//			txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "rec tmark = %3u , %10u \r\n" , timeStamp_hi , timeStamp_lo);
-		}
+//    	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "CRC_BB_HIGH16 =%4x , CRC_BB_LOW16 = %4x , CRC_RX = %4x\r\n",
+//    			CRC_BB_HIGH16,
+//				CRC_BB_LOW16,
+//				CRC_RX);
 
 
 		/*---------------同步-----------------*/
@@ -1311,74 +1115,6 @@ void processUwbRx()
 			}
 		}
 
-			//进行测距
-			int slave_cal=0;
-			if(ori_flag==1)
-			{
-				slave_cal=1;
-			}
-			if(slave_cal==1)
-			{
-				if(node.role==1)
-				{
-					if(altds_twr.poll_cnt==0)
-					{
-						altds_twr.poll_rx_time=node.ts_curr_rmark;
-						altds_twr.poll_tx_time=thmts_rx_frame.tx_stamp;
-						altds_twr.poll_cnt=altds_twr.poll_cnt+1;
-					}
-					else
-					{
-						altds_twr.poll2_rx_time=node.ts_curr_rmark;
-						altds_twr.poll2_tx_time=thmts_rx_frame.tx_stamp;
-						altds_twr.resp_rx_time=thmts_rx_frame.rx_stamp[0];
-
-						if(altds_dstwr_check(&altds_twr))
-						{
-							//uint32_t rtc_tick = SysTimer_GetLoadValue();
-							uint64_t bb_tick1=0;
-							uint64_t bb_tick2=0;
-							get_thmts_bb_systime( &bb_tick1 );
-
-
-//							tof=altds_dstwr_compute(&altds_twr);
-//
-//							get_thmts_bb_systime( &bb_tick2 );
-//							uint64_t bb_tick_diff= timestamp_substract(bb_tick2,bb_tick1);
-//
-//							tof_int=tof*100;
-//							thmts_rx_content.tof_int = tof_int;
-//
-//			            	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "tof_int =%d\r\n",
-//			            			tof_int);
-
-
-			            	// 上报测距消息
-							if (SWITCH_THMTS_RANGING_INFO_T)
-							{
-								thmts_tx_msg_info_t *ptMsg = pvPortMalloc(sizeof(thmts_tx_msg_info_t));
-
-								ranging_info.tof = tof_int;
-
-								ptMsg->msg_id      = 1;
-								ptMsg->msg_type    = TYPE_THMTS_RANGING_INTO_T;
-								ptMsg->msg_status  = 1;
-								ptMsg->msg_ptr     = &ranging_info;
-								xQueueSend(xQueue, &ptMsg, portMAX_DELAY);
-
-							}
-
-
-
-
-
-
-
-						}
-						altds_dstwr_clear(&altds_twr);
-					}
-				}
-			}
 
 		}
 
@@ -1515,25 +1251,6 @@ void processUwbRx()
 //   			adjust_tick_period,
 //				adjust_tick_cnt);
 
-
-
-
-
-
-    	if(tof_flag)
-    	{
-        	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "total rx = %d, ok = %d , timeout = %d , phr error = %d , crc error = %d slot cnt=%d tof int=%d\r\n",
-        			rx_cnt,
-    				crc_ok_cnt,
-    				rx_timeout_cnt,
-    				rx_phr_error_cnt,
-    				rx_ok_cnt - crc_ok_cnt,
-    				slot_cnt,
-					tof_int);
-    	tof_flag=0;
-    	}
-    	else
-    	{
         	txPoint_buff += sprintf((uint8_t *)&debug_ranging_buf[txPoint_buff], "total rx = %d, ok = %d , timeout = %d , phr error = %d , crc error = %d slot cnt=%d \r\n",
         			rx_cnt,
     				crc_ok_cnt,
@@ -1541,7 +1258,6 @@ void processUwbRx()
     				rx_phr_error_cnt,
     				rx_ok_cnt - crc_ok_cnt,
     				slot_cnt);
-    	}
 
     	uint32_t BBCTRL = thmts_rx_content.BBCTRL;
     	uint32_t PHR_info = thmts_rx_content.PHR_info;
