@@ -478,7 +478,7 @@ void mac_startTR(uint8_t behave_type)
 	case 0x40:  //入网申请帧，计算帧
 	{
 		for(int i = 0; i < 16; i++){
-			if(i!=node.dev_id)
+			if(i==node.dev_id)
 			{
 				continue;
 			}

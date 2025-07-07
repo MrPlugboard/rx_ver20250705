@@ -436,7 +436,7 @@ void prvSetupHardware(void)
 //    node_config.role = NODE_ROLE_ANCHOR_MASTER;          //主节点
 //    node.dev_id = 0;
     node_config.role = NODE_ROLE_ANCHOR_SLAVE_NORMAL;    //从节点
-    node_config.dev_id = 1;
+    node_config.dev_id = 15;
     write_flash_node_config();
 #endif
     // 从flash中读取node配置
